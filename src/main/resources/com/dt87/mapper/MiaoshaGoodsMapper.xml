@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dt87.mapper.MiaoshaGoodsMapper">
+    <select id="queryGoodslist" resultType="com.dt87.vo.GoodsVo">
+        SELECT g.*, mg.miaosha_price,mg.stock_count,mg.start_date,mg.end_date FROM goods g
+        LEFT JOIN miaosha_goods mg ON g.`id`=mg.`goods_id`
+    </select>
+    
+    <select id="queryGoodsByGoodsId" resultType="com.dt87.vo.GoodsVo">
+        SELECT g.*, mg.miaosha_price,mg.stock_count,mg.start_date,mg.end_date FROM goods g
+        LEFT JOIN miaosha_goods mg ON g.`id`=mg.`goods_id`
+        where g.id = #{goodsId}
+    </select>
+
+    <!--减少库存-->
+    <update id="reduceCount" >
+        update miaosha_goods set stock_count = stock_count-1 where goodsId = #{id}
+    </update>
+    <!--生成订单详情-->
+    <insert id="insertOrderInfo">
+
+        <!--返回最近一次插入的Id-->
+        <selectKey keyProperty="id" keyColumn="id" resultType="long.class" order="AFTER">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        insert into order_info(user_id, goods_id, goods_name, goods_count, goods_price, goods_channel, status, create_date)values("
+        + "#{userId}, #{goodsId}, #{goodsName}, #{goodsCount}, #{goodsPrice}, #{goodsChannel},#{status},#{createDate} )
+
+    </insert>
+    <!--生成秒杀订单-->
+    <insert id="insertMiaoshaOrder">
+        insert into miaosha_order (user_id, goods_id, order_id)values(#{userId}, #{goodsId}, #{orderId})
+    </insert>
+
+    </mapper>
+
+
+
+
